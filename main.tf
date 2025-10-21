@@ -19,10 +19,13 @@ provider "null" {}
 
 # 3. Resource Block (The actual resource to be created)
 # The null_resource is a no-op resource that simply exists.
-# This ensures that 'terraform plan' shows a resource will be added.
-resource "null_resource" "quick_test_resource" {
+# By setting count to 1000, the plan will now show 1000 resources to be added,
+# resulting in a very long plan output.
+resource "null_resource" "large_test_set" {
+  # Set count to 1000 to drastically increase the size of the plan output
+  count = 1000
+  
   # This triggers a rebuild only if this timestamp changes.
-  # For the initial run, it will show as an Add operation.
   triggers = {
     date_and_time = timestamp()
   }
@@ -30,11 +33,11 @@ resource "null_resource" "quick_test_resource" {
   # The local-exec provisioner is not run during 'terraform plan',
   # but is often used with null resources to signal success or run local scripts.
   provisioner "local-exec" {
-    command = "echo 'Terraform apply would run this command, but the plan passed!'"
+    command = "echo 'Resource instance ${count.index + 1} of 1000 planned.'"
   }
 }
 
 # 4. Optional: An output value to confirm successful definition
 output "plan_status" {
-  value = "The null_resource has been successfully defined for planning."
+  value = "The large_test_set resource with count=1000 has been defined."
 }
